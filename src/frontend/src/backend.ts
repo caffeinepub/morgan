@@ -120,6 +120,7 @@ export interface backendInterface {
     getChatMessagesForCaller(): Promise<Array<ChatMessage>>;
     getUserProfile(user: Principal): Promise<UserProfile | null>;
     isCallerAdmin(): Promise<boolean>;
+    claimFirstAdmin(): Promise<void>;
     promoteToAdmin(user: Principal): Promise<void>;
     register(email: string, displayName: string): Promise<void>;
     replyToMessage(messageId: bigint, replyText: string): Promise<void>;
@@ -252,6 +253,20 @@ export class Backend implements backendInterface {
             }
         } else {
             const result = await this.actor.isCallerAdmin();
+            return result;
+        }
+    }
+    async claimFirstAdmin(): Promise<void> {
+        if (this.processError) {
+            try {
+                const result = await this.actor.claimFirstAdmin();
+                return result;
+            } catch (e) {
+                this.processError(e);
+                throw new Error("unreachable");
+            }
+        } else {
+            const result = await this.actor.claimFirstAdmin();
             return result;
         }
     }

@@ -3,6 +3,7 @@ import { Link, useRouterState } from "@tanstack/react-router";
 import { Menu, X } from "lucide-react";
 import { useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
+import { useIsAdmin } from "../hooks/useQueries";
 import { MorganLogo } from "./MorganLogo";
 
 const navLinks = [
@@ -17,6 +18,7 @@ export function Navbar() {
   const pathname = routerState.location.pathname;
   const { identity, clear } = useInternetIdentity();
   const isAuthenticated = !!identity;
+  const { data: isAdmin } = useIsAdmin();
   const [menuOpen, setMenuOpen] = useState(false);
 
   return (
@@ -46,7 +48,11 @@ export function Navbar() {
               key={link.href}
               to={link.href}
               data-ocid="nav.link"
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${pathname === link.href ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                pathname === link.href
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               {link.label}
             </Link>
@@ -55,11 +61,22 @@ export function Navbar() {
             <Link
               to="/dashboard"
               data-ocid="nav.link"
-              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${pathname === "/dashboard" ? "text-foreground" : "text-muted-foreground hover:text-foreground"}`}
+              className={`px-3 py-1.5 rounded-md text-sm font-medium transition-colors ${
+                pathname === "/dashboard"
+                  ? "text-foreground"
+                  : "text-muted-foreground hover:text-foreground"
+              }`}
             >
               Dashboard
             </Link>
           )}
+          <Link
+            to={isAdmin ? "/admin" : "/admin-setup"}
+            data-ocid="nav.link"
+            className="px-3 py-1.5 rounded-md text-sm font-semibold transition-colors text-amber-400 hover:text-amber-300"
+          >
+            Admin Panel
+          </Link>
         </nav>
 
         <div className="ml-auto flex items-center gap-2">
@@ -139,6 +156,14 @@ export function Navbar() {
               Login / Sign Up
             </Link>
           )}
+          <Link
+            to={isAdmin ? "/admin" : "/admin-setup"}
+            onClick={() => setMenuOpen(false)}
+            data-ocid="nav.link"
+            className="px-3 py-2 rounded-md text-sm font-semibold text-amber-400 hover:text-amber-300"
+          >
+            Admin Panel
+          </Link>
         </div>
       )}
     </header>

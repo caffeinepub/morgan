@@ -27,123 +27,148 @@ const features = [
 export function HomePage() {
   return (
     <div className="w-full">
-      <section className="relative max-w-[1200px] mx-auto px-4 sm:px-6 pt-20 pb-24">
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
-          <motion.div
-            initial={{ opacity: 0, y: 32 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.65, ease: "easeOut" }}
-          >
-            <span
-              className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full mb-6"
-              style={{
-                background: "oklch(0.52 0.20 262 / 18%)",
-                color: "oklch(0.72 0.16 262)",
-              }}
+      {/* Hero section with building background */}
+      <section
+        className="relative"
+        style={{
+          backgroundImage: "url('/assets/uploads/images-2.jpeg')",
+          backgroundSize: "cover",
+          backgroundPosition: "center",
+        }}
+      >
+        {/* Dark overlay for readability */}
+        <div
+          className="absolute inset-0"
+          style={{ background: "oklch(0.10 0.04 240 / 75%)" }}
+        />
+        <div className="relative max-w-[1200px] mx-auto px-4 sm:px-6 pt-20 pb-24">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
+            <motion.div
+              initial={{ opacity: 0, y: 32 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.65, ease: "easeOut" }}
             >
-              <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
-              Program Now Open
-            </span>
-            <h1 className="text-5xl sm:text-6xl font-extrabold text-foreground leading-[1.1] tracking-tight mb-5">
-              You May Be Eligible for{" "}
-              <span style={{ color: "var(--blue-light)" }}>Morgan</span>{" "}
-              Compensation
-            </h1>
-            <p className="text-lg text-muted-foreground leading-relaxed mb-8 max-w-lg">
-              The Morgan Compensation Program is designed to help eligible
-              participants understand and claim their rightful benefits —
-              completely free and fully transparent.
-            </p>
-            <div className="flex flex-wrap gap-3">
-              <Link to="/signup">
-                <Button
-                  size="lg"
-                  data-ocid="hero.primary_button"
-                  className="bg-primary hover:bg-primary/85 text-primary-foreground font-semibold rounded-xl px-7 text-base shadow-glow"
-                >
-                  Get Started <ArrowRight size={16} className="ml-1" />
-                </Button>
-              </Link>
-              <Link to="/support">
-                <Button
-                  size="lg"
-                  variant="outline"
-                  data-ocid="hero.secondary_button"
-                  className="border-white/15 text-muted-foreground hover:text-foreground hover:border-white/30 font-semibold rounded-xl px-7 text-base"
-                >
-                  Contact Support
-                </Button>
-              </Link>
-            </div>
-          </motion.div>
-
-          <motion.div
-            initial={{ opacity: 0, x: 24 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
-            className="hidden lg:block"
-          >
-            <div
-              className="rounded-2xl p-6 shadow-card"
-              style={{
-                background: "var(--navy-card)",
-                border: "1px solid oklch(1 0 0 / 12%)",
-              }}
-            >
-              <div className="flex items-center justify-between mb-5">
-                <p className="text-sm font-semibold text-foreground">
-                  Program Status
-                </p>
-                <span
-                  className="text-xs font-medium px-2.5 py-0.5 rounded-full"
-                  style={{
-                    background: "oklch(0.55 0.18 155 / 20%)",
-                    color: "oklch(0.75 0.14 155)",
-                  }}
-                >
-                  Active
-                </span>
-              </div>
-              <div className="space-y-3">
-                {[
-                  { label: "Enrolled Participants", value: "12,847" },
-                  { label: "Claims Processed", value: "8,391" },
-                  { label: "Avg. Processing Time", value: "4–8 weeks" },
-                  { label: "Program Cost", value: "Free" },
-                ].map((item) => (
-                  <div
-                    key={item.label}
-                    className="flex items-center justify-between py-2.5 px-3 rounded-lg"
-                    style={{ background: "oklch(0.17 0.05 240)" }}
-                  >
-                    <span className="text-sm text-muted-foreground">
-                      {item.label}
-                    </span>
-                    <span className="text-sm font-semibold text-foreground">
-                      {item.value}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div
-                className="mt-5 p-3 rounded-lg flex items-start gap-2"
+              <span
+                className="inline-flex items-center gap-1.5 text-xs font-semibold px-3 py-1 rounded-full mb-6"
                 style={{
-                  background: "oklch(0.52 0.20 262 / 12%)",
-                  border: "1px solid oklch(0.52 0.20 262 / 25%)",
+                  background: "oklch(0.52 0.20 262 / 25%)",
+                  color: "oklch(0.82 0.16 262)",
                 }}
               >
-                <span className="text-base mt-0.5">ℹ️</span>
-                <p className="text-xs text-muted-foreground leading-relaxed">
-                  Participation is 100% free. Morgan will never request payment
-                  or sensitive financial data.
-                </p>
+                <span className="w-1.5 h-1.5 rounded-full bg-green-400 animate-pulse" />
+                Program Now Open
+              </span>
+              <h1 className="text-5xl sm:text-6xl font-extrabold text-white leading-[1.1] tracking-tight mb-5">
+                You May Be Eligible for{" "}
+                <span style={{ color: "oklch(0.72 0.16 262)" }}>Morgan</span>{" "}
+                Compensation
+              </h1>
+              <p
+                className="text-lg leading-relaxed mb-8 max-w-lg"
+                style={{ color: "oklch(0.85 0.02 240)" }}
+              >
+                The Morgan Compensation Program is designed to help eligible
+                participants understand and claim their rightful benefits —
+                completely free and fully transparent.
+              </p>
+              <div className="flex flex-wrap gap-3">
+                <Link to="/signup">
+                  <Button
+                    size="lg"
+                    data-ocid="hero.primary_button"
+                    className="bg-primary hover:bg-primary/85 text-primary-foreground font-semibold rounded-xl px-7 text-base shadow-glow"
+                  >
+                    Get Started <ArrowRight size={16} className="ml-1" />
+                  </Button>
+                </Link>
+                <Link to="/support">
+                  <Button
+                    size="lg"
+                    variant="outline"
+                    data-ocid="hero.secondary_button"
+                    className="border-white/30 text-white hover:text-white hover:border-white/60 hover:bg-white/10 font-semibold rounded-xl px-7 text-base"
+                  >
+                    Contact Support
+                  </Button>
+                </Link>
               </div>
-            </div>
-          </motion.div>
+            </motion.div>
+
+            <motion.div
+              initial={{ opacity: 0, x: 24 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ duration: 0.7, ease: "easeOut", delay: 0.15 }}
+              className="hidden lg:block"
+            >
+              <div
+                className="rounded-2xl p-6 shadow-card"
+                style={{
+                  background: "oklch(0.15 0.05 240 / 85%)",
+                  border: "1px solid oklch(1 0 0 / 20%)",
+                  backdropFilter: "blur(12px)",
+                }}
+              >
+                <div className="flex items-center justify-between mb-5">
+                  <p className="text-sm font-semibold text-white">
+                    Program Status
+                  </p>
+                  <span
+                    className="text-xs font-medium px-2.5 py-0.5 rounded-full"
+                    style={{
+                      background: "oklch(0.55 0.18 155 / 20%)",
+                      color: "oklch(0.75 0.14 155)",
+                    }}
+                  >
+                    Active
+                  </span>
+                </div>
+                <div className="space-y-3">
+                  {[
+                    { label: "Enrolled Participants", value: "12,847" },
+                    { label: "Claims Processed", value: "8,391" },
+                    { label: "Avg. Processing Time", value: "4–8 weeks" },
+                    { label: "Program Cost", value: "Free" },
+                  ].map((item) => (
+                    <div
+                      key={item.label}
+                      className="flex items-center justify-between py-2.5 px-3 rounded-lg"
+                      style={{ background: "oklch(0.12 0.04 240 / 70%)" }}
+                    >
+                      <span
+                        className="text-sm"
+                        style={{ color: "oklch(0.75 0.03 240)" }}
+                      >
+                        {item.label}
+                      </span>
+                      <span className="text-sm font-semibold text-white">
+                        {item.value}
+                      </span>
+                    </div>
+                  ))}
+                </div>
+                <div
+                  className="mt-5 p-3 rounded-lg flex items-start gap-2"
+                  style={{
+                    background: "oklch(0.52 0.20 262 / 15%)",
+                    border: "1px solid oklch(0.52 0.20 262 / 30%)",
+                  }}
+                >
+                  <span className="text-base mt-0.5">ℹ️</span>
+                  <p
+                    className="text-xs leading-relaxed"
+                    style={{ color: "oklch(0.80 0.03 240)" }}
+                  >
+                    Participation is 100% free. Morgan will never request
+                    payment or sensitive financial data.
+                  </p>
+                </div>
+              </div>
+            </motion.div>
+          </div>
         </div>
       </section>
 
-      <section className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-24">
+      <section className="max-w-[1200px] mx-auto px-4 sm:px-6 pb-24 pt-20">
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           whileInView={{ opacity: 1, y: 0 }}

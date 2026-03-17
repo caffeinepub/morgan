@@ -15,6 +15,7 @@ import { Navbar } from "./components/Navbar";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
 import { useIsAdmin } from "./hooks/useQueries";
 import { AdminPage } from "./pages/AdminPage";
+import { AdminSetupPage } from "./pages/AdminSetupPage";
 import { AssistantPage } from "./pages/AssistantPage";
 import { DashboardPage } from "./pages/DashboardPage";
 import { GiveawayPage } from "./pages/GiveawayPage";
@@ -125,6 +126,15 @@ const adminRoute = createRoute({
   path: "/admin",
   component: AdminRoute,
 });
+const adminSetupRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/admin-setup",
+  component: () => (
+    <ProtectedPage>
+      <AdminSetupPage />
+    </ProtectedPage>
+  ),
+});
 
 const router = createRouter({
   routeTree: rootRoute.addChildren([
@@ -137,6 +147,7 @@ const router = createRouter({
     dashboardRoute,
     assistantRoute,
     adminRoute,
+    adminSetupRoute,
   ]),
 });
 

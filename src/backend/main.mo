@@ -183,9 +183,21 @@ actor {
     };
     switch (userProfiles.get(user)) {
       case (null) { Runtime.trap("User does not exist") };
-      case (?userProfile) {
-        // Assign admin role in the access control system
+      case (?_) {
         AccessControl.assignRole(accessControlState, caller, user, #admin);
+      };
+    };
+  };
+
+  // Allows a registered user to claim admin if no admins exist yet
+  public shared ({ caller }) func claimFirstAdmin() : async () {
+    if (accessControlState.adminAssigned) {
+      Runtime.trap("An admin already exists");
+    };
+    switch (userProfiles.get(caller)) {
+      case (null) { Runtime.trap("You must be registered to claim admin") };
+      case (?_) {
+        AccessControl.assignRole(accessControlState, caller, caller, #admin);
       };
     };
   };
