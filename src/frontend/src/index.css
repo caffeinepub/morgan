@@ -1,0 +1,79 @@
+@import url("https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap");
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --radius: 0.75rem;
+    --background: 0.13 0.03 240;
+    --foreground: 0.97 0.01 270;
+    --card: 0.22 0.05 240;
+    --card-foreground: 0.97 0.01 270;
+    --popover: 0.22 0.05 240;
+    --popover-foreground: 0.97 0.01 270;
+    --primary: 0.52 0.2 262;
+    --primary-foreground: 0.97 0.01 270;
+    --secondary: 0.22 0.05 240;
+    --secondary-foreground: 0.97 0.01 270;
+    --muted: 0.2 0.04 240;
+    --muted-foreground: 0.78 0.04 240;
+    --accent: 0.52 0.2 262;
+    --accent-foreground: 0.97 0.01 270;
+    --destructive: 0.577 0.245 27.325;
+    --destructive-foreground: 0.97 0.01 270;
+    --border: 1 0 0 / 12%;
+    --input: 1 0 0 / 12%;
+    --ring: 0.52 0.2 262;
+    --chart-1: 0.52 0.2 262;
+    --chart-2: 0.6 0.12 185;
+    --chart-3: 0.7 0.1 155;
+    --chart-4: 0.65 0.18 42;
+    --chart-5: 0.77 0.19 70;
+    --sidebar: 0.17 0.05 240;
+    --sidebar-foreground: 0.97 0.01 270;
+    --sidebar-primary: 0.52 0.2 262;
+    --sidebar-primary-foreground: 0.97 0.01 270;
+    --sidebar-accent: 0.22 0.05 240;
+    --sidebar-accent-foreground: 0.97 0.01 270;
+    --sidebar-border: 1 0 0 / 12%;
+    --sidebar-ring: 0.52 0.2 262;
+    --navy-darkest: oklch(0.13 0.03 240);
+    --navy-dark: oklch(0.17 0.05 240);
+    --navy-card: oklch(0.22 0.05 240);
+    --navy-mid: oklch(0.27 0.05 240);
+    --blue-accent: oklch(0.52 0.2 262);
+    --blue-hover: oklch(0.46 0.18 262);
+    --blue-light: oklch(0.72 0.16 262);
+    --text-primary: oklch(0.97 0.01 270);
+    --text-secondary: oklch(0.78 0.04 240);
+  }
+
+  * {
+    @apply border-border;
+  }
+
+  html {
+    color-scheme: dark;
+  }
+
+  body {
+    @apply bg-background text-foreground font-sans;
+    background: linear-gradient(
+      160deg,
+      oklch(0.13 0.03 240) 0%,
+      oklch(0.18 0.04 240) 100%
+    );
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+
+  ::selection {
+    background: oklch(0.52 0.2 262 / 40%);
+  }
+  :focus-visible {
+    outline: 2px solid var(--blue-accent);
+    outline-offset: 2px;
+  }
+}
