@@ -6,6 +6,8 @@ import Order "mo:core/Order";
 import Runtime "mo:core/Runtime";
 import Iter "mo:core/Iter";
 import Principal "mo:core/Principal";
+import Int "mo:core/Int";
+import Nat "mo:core/Nat";
 
 import AccessControl "authorization/access-control";
 import MixinAuthorization "authorization/MixinAuthorization";
@@ -55,8 +57,13 @@ actor {
   let userProfiles = Map.empty<UserId, UserProfile>();
   let chatMessages = Map.empty<Nat, ChatMessage>();
   var nextMessageId = 1;
+  var firstAdminClaimed = false;
 
   public shared ({ caller }) func register(email : Text, displayName : Text) : async () {
+    if (caller.isAnonymous()) {
+      Runtime.trap("Anonymous users cannot register");
+    };
+
     switch (userProfiles.get(caller)) {
       case (?_) { Runtime.trap("User is already registered") };
       case (null) {
@@ -73,8 +80,13 @@ actor {
 
         userProfiles.add(caller, userProfile);
 
-        // Directly assign user role without requiring admin privileges
-        accessControlState.userRoles.add(caller, #user);
+        // Register user in access control (non-admin)
+        AccessControl.initialize(
+          accessControlState,
+          caller,
+          "no-admin-token",
+          "no-user-supplied-token"
+        );
       };
     };
   };
@@ -94,7 +106,6 @@ actor {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
 
-    // Verify the profile ID matches the caller
     if (profile.id != caller) {
       Runtime.trap("Cannot save profile for another user");
     };
@@ -116,31 +127,32 @@ actor {
     userProfiles.values().toArray().sort();
   };
 
+  // Send a support message -- any authenticated (non-anonymous) user can send
   public shared ({ caller }) func sendSupportMessage(message : Text) : async () {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can send support messages");
+    if (caller.isAnonymous()) {
+      Runtime.trap("You must be logged in to send messages");
     };
-    switch (userProfiles.get(caller)) {
-      case (null) { Runtime.trap("User is not registered") };
-      case (?userProfile) {
-        let chatMsg : ChatMessage = {
-          id = nextMessageId;
-          userId = caller;
-          userEmail = userProfile.email;
-          message;
-          timestamp = Time.now();
-          adminReply = null;
-          repliedAt = null;
-        };
-        chatMessages.add(nextMessageId, chatMsg);
-        nextMessageId += 1;
-      };
+    let userEmail = switch (userProfiles.get(caller)) {
+      case (?p) { p.email };
+      case (null) { caller.toText() };
     };
+    let chatMsg : ChatMessage = {
+      id = nextMessageId;
+      userId = caller;
+      userEmail;
+      message;
+      timestamp = Time.now();
+      adminReply = null;
+      repliedAt = null;
+    };
+    chatMessages.add(nextMessageId, chatMsg);
+    nextMessageId += 1;
   };
 
+  // Get messages for the caller -- any authenticated user
   public query ({ caller }) func getChatMessagesForCaller() : async [ChatMessage] {
-    if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
-      Runtime.trap("Unauthorized: Only users can access chat messages");
+    if (caller.isAnonymous()) {
+      Runtime.trap("You must be logged in to view messages");
     };
     let messages = chatMessages.values().filter(
       func(msg) { msg.userId == caller }
@@ -181,26 +193,22 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #admin))) {
       Runtime.trap("Unauthorized: Only admins can promote users to admin");
     };
-    switch (userProfiles.get(user)) {
-      case (null) { Runtime.trap("User does not exist") };
-      case (?_) {
-        AccessControl.assignRole(accessControlState, caller, user, #admin);
-      };
-    };
+    AccessControl.assignRole(accessControlState, caller, user, #admin);
   };
 
-  // Allows a registered user to claim admin if no admins exist yet
+  // Allows any logged-in user to claim admin if no admin has been assigned yet.
+  // Directly writes the admin role into state to avoid the permission catch-22.
   public shared ({ caller }) func claimFirstAdmin() : async () {
-    if (accessControlState.adminAssigned) {
+    if (caller.isAnonymous()) {
+      Runtime.trap("You must be logged in to claim admin");
+    };
+    if (firstAdminClaimed) {
       Runtime.trap("An admin already exists");
     };
-    switch (userProfiles.get(caller)) {
-      case (null) { Runtime.trap("You must be registered to claim admin") };
-      case (?_) {
-        // Directly set admin role and flag, bypassing the admin-only assignRole check
-        accessControlState.userRoles.add(caller, #admin);
-        accessControlState.adminAssigned := true;
-      };
-    };
+
+    // Directly assign admin role -- bypass permission check since no admin exists yet
+    accessControlState.userRoles.add(caller, #admin);
+    accessControlState.adminAssigned := true;
+    firstAdminClaimed := true;
   };
 };

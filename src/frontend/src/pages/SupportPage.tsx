@@ -2,30 +2,33 @@ import { motion } from "motion/react";
 
 const channels = [
   {
+    name: "Email",
+    description:
+      "Send us an email and we'll get back to you as soon as possible.",
+    link: "mailto:Mrjamiedamonofficial@gmail.com",
+    label: "Mrjamiedamonofficial@gmail.com",
+    emoji: "✉️",
+    color: "oklch(0.65 0.18 50)",
+    bg: "oklch(0.55 0.18 50 / 15%)",
+    border: "oklch(0.55 0.18 50 / 30%)",
+  },
+  {
     name: "WhatsApp",
     description:
       "Chat with our support team on WhatsApp. Typically respond within 1 hour.",
-    link: "https://wa.me/1234567890",
+    link: "https://wa.me/19402793736",
+    label: "+19402793736",
     emoji: "💬",
     color: "oklch(0.65 0.18 155)",
     bg: "oklch(0.55 0.18 155 / 15%)",
     border: "oklch(0.55 0.18 155 / 30%)",
   },
   {
-    name: "Telegram",
-    description:
-      "Join our Telegram support channel for quick assistance and program updates.",
-    link: "https://t.me/morgansupport",
-    emoji: "✈️",
-    color: "oklch(0.65 0.18 220)",
-    bg: "oklch(0.52 0.18 220 / 15%)",
-    border: "oklch(0.52 0.18 220 / 30%)",
-  },
-  {
     name: "Signal",
     description:
       "Reach us on Signal for encrypted, private communication with our team.",
-    link: "https://signal.me/#p/+1234567890",
+    link: "https://signal.me/#p/+19284386688",
+    label: "+19284386688",
     emoji: "🔒",
     color: "oklch(0.65 0.18 270)",
     bg: "oklch(0.52 0.18 270 / 15%)",
@@ -51,7 +54,7 @@ export function SupportPage() {
         </p>
       </motion.div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
         {channels.map((ch, i) => (
           <motion.div
             key={ch.name}
@@ -81,10 +84,10 @@ export function SupportPage() {
               target="_blank"
               rel="noopener noreferrer"
               data-ocid={`support.${ch.name.toLowerCase()}.button`}
-              className="w-full py-2.5 px-5 rounded-xl text-sm font-semibold text-white text-center transition-opacity hover:opacity-85"
+              className="w-full py-2.5 px-5 rounded-xl text-sm font-semibold text-white text-center transition-opacity hover:opacity-85 truncate"
               style={{ background: "var(--blue-accent)" }}
             >
-              Chat Now
+              {ch.label}
             </a>
           </motion.div>
         ))}

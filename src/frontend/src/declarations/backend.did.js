@@ -33,6 +33,7 @@ export const UserProfile = IDL.Record({
 export const idlService = IDL.Service({
   '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
   'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+  'claimFirstAdmin' : IDL.Func([], [], []),
   'getAllChatMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
   'getAllUsers' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
   'getCallerUserProfile' : IDL.Func([], [UserProfile], ['query']),
@@ -79,6 +80,7 @@ export const idlFactory = ({ IDL }) => {
   return IDL.Service({
     '_initializeAccessControlWithSecret' : IDL.Func([IDL.Text], [], []),
     'assignCallerUserRole' : IDL.Func([IDL.Principal, UserRole], [], []),
+    'claimFirstAdmin' : IDL.Func([], [], []),
     'getAllChatMessages' : IDL.Func([], [IDL.Vec(ChatMessage)], ['query']),
     'getAllUsers' : IDL.Func([], [IDL.Vec(UserProfile)], ['query']),
     'getCallerUserProfile' : IDL.Func([], [UserProfile], ['query']),

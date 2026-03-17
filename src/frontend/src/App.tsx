@@ -10,6 +10,7 @@ import {
   useRouterState,
 } from "@tanstack/react-router";
 import { ChatWidget } from "./components/ChatWidget";
+import { CompensationPopup } from "./components/CompensationPopup";
 import { Footer } from "./components/Footer";
 import { Navbar } from "./components/Navbar";
 import { useInternetIdentity } from "./hooks/useInternetIdentity";
@@ -34,6 +35,7 @@ function Layout() {
       </main>
       <Footer />
       <ChatWidget />
+      <CompensationPopup />
       <Toaster />
     </div>
   );

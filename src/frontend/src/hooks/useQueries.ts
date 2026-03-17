@@ -1,3 +1,4 @@
+import type { Principal } from "@icp-sdk/core/principal";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import type { ChatMessage, UserProfile } from "../backend.d";
 import { useActor } from "./useActor";
@@ -61,6 +62,7 @@ export function useAllChatMessages() {
     },
     enabled: !!actor && !isFetching,
     refetchInterval: 10000,
+    retry: 1,
   });
 }
 
@@ -73,6 +75,7 @@ export function useAllUsers() {
       return await actor.getAllUsers();
     },
     enabled: !!actor && !isFetching,
+    retry: 1,
   });
 }
 
@@ -103,6 +106,20 @@ export function useReplyToMessage() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["allChatMessages"] });
+    },
+  });
+}
+
+export function usePromoteToAdmin() {
+  const { actor } = useActor();
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (user: Principal) => {
+      if (!actor) throw new Error("Not connected");
+      await actor.promoteToAdmin(user);
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["allUsers"] });
     },
   });
 }

@@ -3,18 +3,52 @@ import { Input } from "@/components/ui/input";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useChatMessages, useSendMessage } from "../hooks/useQueries";
+
+const SEEN_KEY = "morgan_chat_seen_replies";
+
+function getSeenIds(): Set<string> {
+  try {
+    const raw = localStorage.getItem(SEEN_KEY);
+    return new Set(raw ? JSON.parse(raw) : []);
+  } catch {
+    return new Set();
+  }
+}
+
+function markAllSeen(ids: string[]) {
+  try {
+    localStorage.setItem(SEEN_KEY, JSON.stringify(ids));
+  } catch {
+    // ignore
+  }
+}
 
 export function ChatWidget() {
   const { identity } = useInternetIdentity();
   const isAuthenticated = !!identity;
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
+  const [seenIds, setSeenIds] = useState<Set<string>>(getSeenIds);
   const { data: messages = [] } = useChatMessages();
   const sendMessage = useSendMessage();
   const bottomRef = useRef<HTMLDivElement>(null);
+
+  // Count unseen admin replies
+  const unreadCount = messages.filter(
+    (msg) => msg.adminReply && !seenIds.has(msg.id.toString()),
+  ).length;
+
+  // When chat opens, mark all current replied messages as seen
+  useEffect(() => {
+    if (open && messages.length > 0) {
+      const allIds = messages.map((m) => m.id.toString());
+      markAllSeen(allIds);
+      setSeenIds(new Set(allIds));
+    }
+  }, [open, messages]);
 
   if (!isAuthenticated) return null;
 
@@ -59,6 +93,23 @@ export function ChatWidget() {
               transition={{ duration: 0.15 }}
             >
               <MessageCircle size={22} color="white" />
+            </motion.span>
+          )}
+        </AnimatePresence>
+        {/* Unread badge */}
+        <AnimatePresence>
+          {!open && unreadCount > 0 && (
+            <motion.span
+              key="badge"
+              initial={{ scale: 0, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0, opacity: 0 }}
+              transition={{ type: "spring", stiffness: 400, damping: 20 }}
+              className="absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full flex items-center justify-center text-[11px] font-bold text-white pointer-events-none"
+              style={{ background: "oklch(0.55 0.22 25)" }}
+              data-ocid="chat.toast"
+            >
+              {unreadCount > 99 ? "99+" : unreadCount}
             </motion.span>
           )}
         </AnimatePresence>

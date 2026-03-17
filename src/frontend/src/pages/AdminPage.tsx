@@ -11,7 +11,14 @@ import {
   TableRow,
 } from "@/components/ui/table";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Loader2, MessageSquare, Send, Shield } from "lucide-react";
+import {
+  AlertTriangle,
+  Loader2,
+  MessageSquare,
+  Send,
+  Shield,
+  ShieldCheck,
+} from "lucide-react";
 import { motion } from "motion/react";
 import { useState } from "react";
 import { toast } from "sonner";
@@ -19,6 +26,7 @@ import type { ChatMessage } from "../backend.d";
 import {
   useAllChatMessages,
   useAllUsers,
+  usePromoteToAdmin,
   useReplyToMessage,
 } from "../hooks/useQueries";
 
@@ -139,9 +147,25 @@ function MessageThread({
 
 export function AdminPage() {
   const { data: users = [], isLoading: usersLoading } = useAllUsers();
-  const { data: messages = [], isLoading: messagesLoading } =
-    useAllChatMessages();
+  const {
+    data: messages = [],
+    isLoading: messagesLoading,
+    isError: messagesError,
+  } = useAllChatMessages();
+  const promoteMutation = usePromoteToAdmin();
   const grouped = groupByUser(messages);
+
+  const handlePromote = async (
+    userId: import("../backend.d").UserId,
+    name: string,
+  ) => {
+    try {
+      await promoteMutation.mutateAsync(userId);
+      toast.success(`${name} is now an admin`);
+    } catch {
+      toast.error("Failed to promote user");
+    }
+  };
 
   return (
     <div className="max-w-[1200px] mx-auto px-4 sm:px-6 py-10">
@@ -221,6 +245,9 @@ export function AdminPage() {
                     <TableHead className="text-muted-foreground">
                       Registered
                     </TableHead>
+                    <TableHead className="text-muted-foreground">
+                      Actions
+                    </TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody>
@@ -244,6 +271,29 @@ export function AdminPage() {
                           Number(user.registeredAt) / 1_000_000,
                         ).toLocaleDateString()}
                       </TableCell>
+                      <TableCell>
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() =>
+                            handlePromote(user.id, user.displayName)
+                          }
+                          disabled={promoteMutation.isPending}
+                          data-ocid={`admin.users.promote.${idx + 1}`}
+                          className="h-7 text-xs gap-1.5"
+                          style={{
+                            borderColor: "oklch(0.65 0.18 50 / 50%)",
+                            color: "oklch(0.80 0.15 50)",
+                          }}
+                        >
+                          {promoteMutation.isPending ? (
+                            <Loader2 size={12} className="animate-spin" />
+                          ) : (
+                            <ShieldCheck size={12} />
+                          )}
+                          Make Admin
+                        </Button>
+                      </TableCell>
                     </TableRow>
                   ))}
                 </TableBody>
@@ -258,6 +308,41 @@ export function AdminPage() {
               {[1, 2, 3].map((i) => (
                 <Skeleton key={i} className="h-24 w-full rounded-xl" />
               ))}
+            </div>
+          ) : messagesError ? (
+            <div
+              className="rounded-2xl p-6 flex items-start gap-3"
+              data-ocid="admin.messages.error_state"
+              style={{
+                background: "oklch(0.50 0.15 70 / 12%)",
+                border: "1px solid oklch(0.70 0.15 70 / 40%)",
+              }}
+            >
+              <AlertTriangle
+                size={20}
+                className="shrink-0 mt-0.5"
+                style={{ color: "oklch(0.80 0.15 70)" }}
+              />
+              <div>
+                <p
+                  className="text-sm font-semibold mb-1"
+                  style={{ color: "oklch(0.85 0.12 70)" }}
+                >
+                  Could not load messages
+                </p>
+                <p className="text-sm" style={{ color: "oklch(0.75 0.10 70)" }}>
+                  You may not have admin access yet, or there was a network
+                  error. Try refreshing the page. If the problem persists, go to{" "}
+                  <a
+                    href="/admin-setup"
+                    className="underline font-medium"
+                    style={{ color: "oklch(0.85 0.15 70)" }}
+                  >
+                    /admin-setup
+                  </a>{" "}
+                  to claim admin access.
+                </p>
+              </div>
             </div>
           ) : Object.keys(grouped).length === 0 ? (
             <div
