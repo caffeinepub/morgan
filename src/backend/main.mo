@@ -72,9 +72,9 @@ actor {
         };
 
         userProfiles.add(caller, userProfile);
-        
-        // Assign user role in the access control system
-        AccessControl.assignRole(accessControlState, caller, caller, #user);
+
+        // Directly assign user role without requiring admin privileges
+        accessControlState.userRoles.add(caller, #user);
       };
     };
   };
@@ -93,12 +93,12 @@ actor {
     if (not (AccessControl.hasPermission(accessControlState, caller, #user))) {
       Runtime.trap("Unauthorized: Only users can save profiles");
     };
-    
+
     // Verify the profile ID matches the caller
     if (profile.id != caller) {
       Runtime.trap("Cannot save profile for another user");
     };
-    
+
     userProfiles.add(caller, profile);
   };
 
@@ -197,7 +197,9 @@ actor {
     switch (userProfiles.get(caller)) {
       case (null) { Runtime.trap("You must be registered to claim admin") };
       case (?_) {
-        AccessControl.assignRole(accessControlState, caller, caller, #admin);
+        // Directly set admin role and flag, bypassing the admin-only assignRole check
+        accessControlState.userRoles.add(caller, #admin);
+        accessControlState.adminAssigned := true;
       };
     };
   };
