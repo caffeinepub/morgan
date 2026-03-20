@@ -4,6 +4,8 @@ import { ScrollArea } from "@/components/ui/scroll-area";
 import { MessageCircle, Send, X } from "lucide-react";
 import { AnimatePresence, motion } from "motion/react";
 import { useEffect, useRef, useState } from "react";
+import { toast } from "sonner";
+import { useActor } from "../hooks/useActor";
 import { useInternetIdentity } from "../hooks/useInternetIdentity";
 import { useChatMessages, useSendMessage } from "../hooks/useQueries";
 
@@ -28,7 +30,9 @@ function markAllSeen(ids: string[]) {
 
 export function ChatWidget() {
   const { identity } = useInternetIdentity();
+  const { isFetching: actorLoading, actor } = useActor();
   const isAuthenticated = !!identity;
+  const isReady = isAuthenticated && !!actor && !actorLoading;
   const [open, setOpen] = useState(false);
   const [input, setInput] = useState("");
   const [seenIds, setSeenIds] = useState<Set<string>>(getSeenIds);
@@ -50,17 +54,22 @@ export function ChatWidget() {
     }
   }, [open, messages]);
 
-  if (!isAuthenticated) return null;
-
   const handleSend = () => {
     const trimmed = input.trim();
-    if (!trimmed) return;
-    sendMessage.mutate(trimmed);
-    setInput("");
-    setTimeout(
-      () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
-      100,
-    );
+    if (!trimmed || !isReady) return;
+    sendMessage.mutate(trimmed, {
+      onSuccess: () => {
+        setInput("");
+        setTimeout(
+          () => bottomRef.current?.scrollIntoView({ behavior: "smooth" }),
+          100,
+        );
+      },
+      onError: (err) => {
+        console.error("Chat send error:", err);
+        toast.error("Failed to send message. Please try again.");
+      },
+    });
   };
 
   return (
@@ -151,47 +160,69 @@ export function ChatWidget() {
             >
               <ScrollArea className="h-full">
                 <div className="p-4 flex flex-col gap-2">
-                  {messages.length === 0 && (
-                    <div className="text-center py-8">
-                      <p className="text-xs text-muted-foreground">
-                        No messages yet. Send us a message!
+                  {!isAuthenticated ? (
+                    <div className="text-center py-8 space-y-2">
+                      <MessageCircle
+                        size={28}
+                        className="mx-auto opacity-40"
+                        style={{ color: "var(--blue-light)" }}
+                      />
+                      <p className="text-sm text-muted-foreground">
+                        Please log in to send us a message.
                       </p>
+                      <a
+                        href="/login"
+                        className="inline-block text-sm font-semibold underline"
+                        style={{ color: "var(--blue-light)" }}
+                      >
+                        Log in
+                      </a>
                     </div>
-                  )}
-                  {messages.map((msg) => (
-                    <div
-                      key={msg.id.toString()}
-                      className="flex flex-col gap-1"
-                    >
-                      <div className="flex justify-end">
-                        <div
-                          className="max-w-[85%] px-3 py-2 rounded-2xl rounded-br-sm text-sm text-white"
-                          style={{ background: "var(--blue-accent)" }}
-                        >
-                          {msg.message}
-                        </div>
-                      </div>
-                      {msg.adminReply && (
-                        <div className="flex justify-start">
-                          <div
-                            className="max-w-[85%] px-3 py-2 rounded-2xl rounded-bl-sm text-sm"
-                            style={{
-                              background: "oklch(0.95 0.02 240)",
-                              color: "oklch(0.22 0.05 240)",
-                            }}
-                          >
-                            <span
-                              className="block text-[10px] font-semibold mb-0.5"
-                              style={{ color: "var(--blue-accent)" }}
-                            >
-                              Support
-                            </span>
-                            {msg.adminReply}
-                          </div>
+                  ) : (
+                    <>
+                      {messages.length === 0 && (
+                        <div className="text-center py-8">
+                          <p className="text-xs text-muted-foreground">
+                            No messages yet. Send us a message!
+                          </p>
                         </div>
                       )}
-                    </div>
-                  ))}
+                      {messages.map((msg) => (
+                        <div
+                          key={msg.id.toString()}
+                          className="flex flex-col gap-1"
+                        >
+                          <div className="flex justify-end">
+                            <div
+                              className="max-w-[85%] px-3 py-2 rounded-2xl rounded-br-sm text-sm text-white"
+                              style={{ background: "var(--blue-accent)" }}
+                            >
+                              {msg.message}
+                            </div>
+                          </div>
+                          {msg.adminReply && (
+                            <div className="flex justify-start">
+                              <div
+                                className="max-w-[85%] px-3 py-2 rounded-2xl rounded-bl-sm text-sm"
+                                style={{
+                                  background: "oklch(0.95 0.02 240)",
+                                  color: "oklch(0.22 0.05 240)",
+                                }}
+                              >
+                                <span
+                                  className="block text-[10px] font-semibold mb-0.5"
+                                  style={{ color: "var(--blue-accent)" }}
+                                >
+                                  Support
+                                </span>
+                                {msg.adminReply}
+                              </div>
+                            </div>
+                          )}
+                        </div>
+                      ))}
+                    </>
+                  )}
                   <div ref={bottomRef} />
                 </div>
               </ScrollArea>
@@ -206,8 +237,20 @@ export function ChatWidget() {
               <Input
                 value={input}
                 onChange={(e) => setInput(e.target.value)}
-                onKeyDown={(e) => e.key === "Enter" && handleSend()}
-                placeholder="Type a message..."
+                onKeyDown={(e) =>
+                  e.key === "Enter" &&
+                  isReady &&
+                  !sendMessage.isPending &&
+                  handleSend()
+                }
+                placeholder={
+                  !isAuthenticated
+                    ? "Log in to send a message"
+                    : actorLoading || !actor
+                      ? "Connecting..."
+                      : "Type a message..."
+                }
+                disabled={!isReady || sendMessage.isPending}
                 data-ocid="chat.input"
                 className="flex-1 text-sm h-9"
                 style={{
@@ -219,7 +262,7 @@ export function ChatWidget() {
               <Button
                 size="icon"
                 onClick={handleSend}
-                disabled={!input.trim() || sendMessage.isPending}
+                disabled={!isReady || !input.trim() || sendMessage.isPending}
                 data-ocid="chat.submit_button"
                 className="h-9 w-9 shrink-0"
                 style={{ background: "var(--blue-accent)" }}

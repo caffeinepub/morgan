@@ -47,22 +47,34 @@ function ProtectedPage({
 }: { children: React.ReactNode; requireAdmin?: boolean }) {
   const { identity, isInitializing } = useInternetIdentity();
   const navigate = useNavigate();
-  const { data: isAdmin } = useIsAdmin();
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
 
+  // Wait for auth to initialize
   if (isInitializing)
     return (
       <div className="flex items-center justify-center min-h-[50vh]">
         <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
       </div>
     );
+
   if (!identity) {
     navigate({ to: "/login" });
     return null;
   }
+
+  // Wait for admin check to complete before deciding to redirect
+  if (requireAdmin && isAdminLoading)
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+
   if (requireAdmin && !isAdmin) {
     navigate({ to: "/dashboard" });
     return null;
   }
+
   return <>{children}</>;
 }
 

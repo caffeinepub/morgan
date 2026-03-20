@@ -6,7 +6,7 @@ const channels = [
     description:
       "Send us an email and we'll get back to you as soon as possible.",
     link: "mailto:Mrjamiedamonofficial@gmail.com",
-    label: "Mrjamiedamonofficial@gmail.com",
+    label: "Message via Email",
     emoji: "✉️",
     color: "oklch(0.65 0.18 50)",
     bg: "oklch(0.55 0.18 50 / 15%)",
@@ -17,7 +17,7 @@ const channels = [
     description:
       "Chat with our support team on WhatsApp. Typically respond within 1 hour.",
     link: "https://wa.me/19402793736",
-    label: "+19402793736",
+    label: "Message on WhatsApp",
     emoji: "💬",
     color: "oklch(0.65 0.18 155)",
     bg: "oklch(0.55 0.18 155 / 15%)",
@@ -28,7 +28,7 @@ const channels = [
     description:
       "Reach us on Signal for encrypted, private communication with our team.",
     link: "https://signal.me/#p/+19284386688",
-    label: "+19284386688",
+    label: "Message on Signal",
     emoji: "🔒",
     color: "oklch(0.65 0.18 270)",
     bg: "oklch(0.52 0.18 270 / 15%)",
@@ -84,7 +84,7 @@ export function SupportPage() {
               target="_blank"
               rel="noopener noreferrer"
               data-ocid={`support.${ch.name.toLowerCase()}.button`}
-              className="w-full py-2.5 px-5 rounded-xl text-sm font-semibold text-white text-center transition-opacity hover:opacity-85 truncate"
+              className="w-full py-2.5 px-5 rounded-xl text-sm font-semibold text-white text-center transition-opacity hover:opacity-85"
               style={{ background: "var(--blue-accent)" }}
             >
               {ch.label}

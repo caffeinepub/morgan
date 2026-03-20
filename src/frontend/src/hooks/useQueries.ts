@@ -58,11 +58,14 @@ export function useAllChatMessages() {
     queryKey: ["allChatMessages"],
     queryFn: async () => {
       if (!actor) return [];
-      return await actor.getAllChatMessages();
+      try {
+        return await actor.getAllChatMessages();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
     refetchInterval: 10000,
-    retry: 1,
   });
 }
 
@@ -72,10 +75,13 @@ export function useAllUsers() {
     queryKey: ["allUsers"],
     queryFn: async () => {
       if (!actor) return [];
-      return await actor.getAllUsers();
+      try {
+        return await actor.getAllUsers();
+      } catch {
+        return [];
+      }
     },
     enabled: !!actor && !isFetching,
-    retry: 1,
   });
 }
 
@@ -84,9 +90,14 @@ export function useSendMessage() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: async (message: string) => {
-      if (!actor) throw new Error("Not connected");
+      if (!actor)
+        throw new Error(
+          "Not connected to backend. Please wait a moment and try again.",
+        );
       await actor.sendSupportMessage(message);
     },
+    retry: 1,
+    retryDelay: 1500,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["chatMessages"] });
     },

@@ -3,9 +3,10 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useNavigate } from "@tanstack/react-router";
 import { AlertCircle, CheckCircle, Loader2, Shield } from "lucide-react";
 import { motion } from "motion/react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { useActor } from "../hooks/useActor";
+import { useIsAdmin } from "../hooks/useQueries";
 
 export function AdminSetupPage() {
   const { actor } = useActor();
@@ -14,6 +15,15 @@ export function AdminSetupPage() {
   const [loading, setLoading] = useState(false);
   const [done, setDone] = useState(false);
   const [error, setError] = useState("");
+  const { data: isAdmin, isLoading: isAdminLoading } = useIsAdmin();
+
+  // If the user is already an admin (e.g. promoted by another admin), redirect them directly
+  useEffect(() => {
+    if (!isAdminLoading && isAdmin) {
+      toast.success("You already have admin access!");
+      navigate({ to: "/admin" });
+    }
+  }, [isAdmin, isAdminLoading, navigate]);
 
   const handleClaim = async () => {
     if (!actor) return;
@@ -28,8 +38,18 @@ export function AdminSetupPage() {
     } catch (e: unknown) {
       const msg = e instanceof Error ? e.message : String(e);
       if (msg.includes("admin already exists")) {
+        // Check if the user was promoted — if so, send them to /admin
+        try {
+          const adminStatus = await actor.isCallerAdmin();
+          if (adminStatus) {
+            await queryClient.invalidateQueries({ queryKey: ["isAdmin"] });
+            toast.success("You already have admin access!");
+            navigate({ to: "/admin" });
+            return;
+          }
+        } catch {}
         setError(
-          "An admin already exists. Only the first user can claim admin this way.",
+          "An admin already exists. If you were promoted to admin by another admin, go directly to the Admin Panel.",
         );
       } else if (msg.includes("must be registered")) {
         setError("You must be logged in and registered to claim admin.");
@@ -40,6 +60,14 @@ export function AdminSetupPage() {
       setLoading(false);
     }
   };
+
+  if (isAdminLoading) {
+    return (
+      <div className="flex items-center justify-center min-h-[50vh]">
+        <div className="w-6 h-6 border-2 border-primary border-t-transparent rounded-full animate-spin" />
+      </div>
+    );
+  }
 
   return (
     <div className="min-h-[70vh] flex items-center justify-center px-4">
@@ -85,13 +113,22 @@ export function AdminSetupPage() {
               <AlertCircle size={16} className="mt-0.5 shrink-0 text-red-400" />
               <span className="text-red-300">{error}</span>
             </div>
-            <Button
-              className="mt-4 w-full"
-              variant="outline"
-              onClick={() => setError("")}
-            >
-              Try Again
-            </Button>
+            <div className="flex gap-2 mt-4">
+              <Button
+                className="flex-1"
+                variant="outline"
+                onClick={() => setError("")}
+              >
+                Try Again
+              </Button>
+              <Button
+                className="flex-1 font-semibold"
+                onClick={() => navigate({ to: "/admin" })}
+                style={{ background: "var(--blue-accent)" }}
+              >
+                Go to Admin Panel
+              </Button>
+            </div>
           </div>
         ) : (
           <Button
